@@ -197,11 +197,15 @@ export default function CartPage() {
         </div>
 
         <div style={{ marginTop: 16 }}>
-          <button onClick={() => nav('/checkout', { state: { district, ship, coupon: couponInfo } })}>
+          <button
+            onClick={() =>
+              nav('/checkout', { state: { district, ship, coupon: couponInfo, location } })
+            }
+          >
             Continuar al checkout
           </button>
         </div>
       </div>
-     </div> 
-     );
+    </div>
+  );
 }

@@ -27,13 +27,18 @@ export default function OrderPage() {
   useEffect(() => { load(); }, [id]);
 
   async function pay(result = 'success') {
-    try {
-      await apiPayOrder(id, { method: 'mock', result });
-      await load();
-    } catch (e) {
-      alert(String(e.message || e));
+  try {
+    await apiPayOrder(id, { method: 'mock', result });
+    await load();
+
+    if (result === 'success') {
+      localStorage.setItem('trackOrderId', String(id));
     }
+  } catch (e) {
+    alert(String(e.message || e));
   }
+}
+
 
   if (loading) return <div style={{ padding: 16 }}>Cargando orden...</div>;
   if (err) return <div style={{ color: 'red', padding: 16 }}>Error: {err}</div>;

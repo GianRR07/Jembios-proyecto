@@ -10,7 +10,9 @@
     "migrate:payments": "node db/migrate-run-2.js",
     "migrate:tasks": "node db/migrate-run-3.js",
     "migrate:deliveries": "node db/migrate-run-4.js",
-    "migrate:complaints": "node db/migrate-run-5.js"
+    "migrate:complaints": "node db/migrate-run-5.js",
+    "migrate:orders:location": "node db/migrate-run-6.js"
+
   },
   "keywords": [],
   "author": "",

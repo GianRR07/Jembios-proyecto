@@ -32,6 +32,10 @@ export const apiGetOrder = (id) => req(`/orders/${id}`);
 export const apiPayOrder = (id, payload) =>
   req(`/orders/${id}/pay`, { method: 'POST', body: JSON.stringify(payload) });
 
+export const apiCreateComplaint = (payload) =>
+  req('/complaints', { method: 'POST', body: JSON.stringify(payload) });
+
+
 export default {
   apiGetProducts,
   apiQuoteShipping,
@@ -39,4 +43,5 @@ export default {
   apiCreateOrder,
   apiGetOrder,
   apiPayOrder,
+  apiCreateComplaint,
 };

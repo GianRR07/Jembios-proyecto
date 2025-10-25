@@ -14,6 +14,8 @@ import Header from './components/Header.jsx'
 import CartPage from './pages/Cart.jsx'
 import CheckoutPage from './pages/Checkout.jsx'
 import OrderPage from './pages/Order.jsx'
+import TrackingPage from './pages/Tracking.jsx';
+
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/order/:id" element={<OrderPage />} />
+          <Route path="/tracking/:id" element={<TrackingPage />} />
+
         </Routes>
       </BrowserRouter>
     </CartProvider>

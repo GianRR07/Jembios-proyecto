@@ -96,6 +96,9 @@ function getProductsByIds(ids) {
 router.post('/', async (req, res) => {
   try {
     const { customer, items, couponCode } = req.body || {};
+    const destLat = customer?.location?.latitude ?? null;
+    const destLng = customer?.location?.longitude ?? null;
+
     if (!customer || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'customer e items son requeridos' });
     }
@@ -159,12 +162,15 @@ router.post('/', async (req, res) => {
     const orderId = await new Promise((resolve, reject) => {
       db.run(
         `INSERT INTO orders
-          (customer_name, doc_type, customer_doc, email, phone, address, district, city,
-           status, subtotal, shipping_cost, discount_total, total_amount)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'awaiting_payment', ?, ?, ?, ?)`,
+    (customer_name, doc_type, customer_doc, email, phone, address, district, city,
+     status, subtotal, shipping_cost, discount_total, total_amount,
+     dest_lat, dest_lng)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'awaiting_payment', ?, ?, ?, ?, ?, ?)`,
         [
           name, docType || null, doc || null, email || null, phone || null, address || null,
-          district, city || null, subtotal, shipping_cost, discount_total, total_amount
+          district, city || null,
+          subtotal, shipping_cost, discount_total, total_amount,
+          destLat, destLng
         ],
         function (err) {
           if (err) return reject(err);

@@ -1,0 +1,2 @@
+ALTER TABLE orders ADD COLUMN dest_lat REAL;
+ALTER TABLE orders ADD COLUMN dest_lng REAL;
