@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+<<<<<<< HEAD
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 
 import { CartProvider } from './store/cart.jsx'
@@ -37,9 +38,13 @@ function App() {
     </CartProvider>
   )
 }
+=======
+import './index.css'
+import App from './App.jsx'
+>>>>>>> cc9a1ac146a8e173ef5a1370527df11fa6a64843
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 )
