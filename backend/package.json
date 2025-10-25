@@ -11,9 +11,6 @@
     "migrate:tasks": "node db/migrate-run-3.js",
     "migrate:deliveries": "node db/migrate-run-4.js",
     "migrate:complaints": "node db/migrate-run-5.js"
-
-
-
   },
   "keywords": [],
   "author": "",
@@ -22,6 +19,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "geolib": "^3.3.4",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {

@@ -7,6 +7,8 @@ import Home from './pages/Home.jsx'
 import Ventas from './ventas/index.jsx'
 import Facturas from './facturas/index.jsx'
 import Marketing from './marketing/index.jsx'
+import Header from './components/Header.jsx'
+
 
 // nuevas páginas:
 import CartPage from './pages/Cart.jsx'
@@ -16,14 +18,11 @@ import OrderPage from './pages/Order.jsx'
 function App() {
   return (
     <CartProvider>
+
       <BrowserRouter>
-        <nav style={{ display: 'flex', gap: 12, padding: 12, borderBottom: '1px solid #ddd' }}>
-          <Link to="/">Inicio</Link>
-          <Link to="/ventas">Ventas</Link>
-          <Link to="/facturas">Facturas</Link>
-          <Link to="/marketing">Marketing</Link>
-          <Link to="/cart">Carrito</Link>
-        </nav>
+      <Header />
+        
+        
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/ventas" element={<Ventas />} />

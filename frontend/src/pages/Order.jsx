@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiGetOrder, apiPayOrder } from '../services/api';
+import './Order.css';
+
+
 
 export default function OrderPage() {
   const { id } = useParams();
@@ -38,30 +41,47 @@ export default function OrderPage() {
 
   const { order, items } = data;
 
+  const statusClass = `status-badge status-${(order.status || '').replace(/\s+/g, '_')}`;
+
+
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Orden #{order.id}</h2>
-      <div>Status: <b>{order.status}</b></div>
-      <div>Cliente: {order.customer_name}</div>
-      <div>Total: S/ {order.total_amount?.toFixed?.(2) ?? order.total_amount}</div>
+    <div className="order-container">
+      <h2 className="order-title">Orden #{order.id}</h2>
 
-      <h3 style={{ marginTop: 12 }}>Items</h3>
-      <ul>
-        {items.map(it => (
-          <li key={it.id}>
-            {it.name} x {it.qty} — S/ {(it.unit_price * it.qty).toFixed(2)}
-          </li>
-        ))}
-      </ul>
+      <div className="order-header">
+        <div className="order-meta">
+          <div className="status-wrap">
+            <span className="status-label">Estado:</span>
+            <span className={statusClass}>{order.status}</span>
+          </div>
+          <div>Cliente: <b>{order.customer_name}</b></div>
+        </div>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <div className="order-total">
+          Total: S/ {order.total_amount?.toFixed?.(2) ?? order.total_amount}
+        </div>
+      </div>
+
+      <div className="items-block">
+        <h3 className="items-title">Items</h3>
+        <ul className="items-list">
+          {items.map(it => (
+            <li key={it.id}>
+              <span>{it.name} x {it.qty}</span>
+              <span>S/ {(it.unit_price * it.qty).toFixed(2)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="actions">
         {order.status === 'awaiting_payment' && (
           <>
-            <button onClick={() => pay('success')}>Pagar (simulado)</button>
-            <button onClick={() => pay('failed')}>Fallar pago</button>
+            <button className="btn-primary" onClick={() => pay('success')}>Pagar (simulado)</button>
+            <button className="btn-secondary" onClick={() => pay('failed')}>Fallar pago</button>
           </>
         )}
-        <Link to="/">Volver al inicio</Link>
+        <Link to="/" className="btn-secondary">Volver al inicio</Link>
       </div>
     </div>
   );

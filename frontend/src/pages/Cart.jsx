@@ -2,14 +2,45 @@ import { useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../store/cart.jsx';
 import { apiQuoteShipping, apiValidateCoupon } from '../services/api';
+import './Cart.css';
 
-const DISTRICTS = ['Lima Centro','Lima Norte','Lima Sur','Lima Este'];
+
+// Leaflet imports
+import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+
+// Corrige íconos por defecto
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+const DefaultIcon = L.icon({ iconUrl, shadowUrl: iconShadow, iconAnchor: [12, 41] });
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Coordenadas aproximadas de Jembios (Carabayllo)
+const ORIGIN = [-11.9523, -77.0394];
+
+// Componente para seleccionar ubicación
+function LocationPicker({ onSelect }) {
+  const [marker, setMarker] = useState(null);
+  useMapEvents({
+    click(e) {
+      setMarker(e.latlng);
+      onSelect({ latitude: e.latlng.lat, longitude: e.latlng.lng });
+    },
+  });
+  return marker ? <Marker position={marker} /> : null;
+}
+
+
+const DISTRICTS = ['Lima Centro', 'Lima Norte', 'Lima Sur', 'Lima Este'];
 
 export default function CartPage() {
   const nav = useNavigate();
   const { items, setQty, remove, subtotal } = useCart();
 
+  // NUEVO: estado de ubicación y modo de cálculo
   const [district, setDistrict] = useState('Lima Centro');
+  const [location, setLocation] = useState(null); // ubicación { latitude, longitude }
   const [ship, setShip] = useState(null);
   const [shipErr, setShipErr] = useState('');
   const [coupon, setCoupon] = useState('');
@@ -23,10 +54,10 @@ export default function CartPage() {
   async function quote() {
     setShipErr('');
     try {
-      const payload = {
-        district,
-        items: items.map(it => ({ productId: it.product.id, qty: it.qty })),
-      };
+      const payload = location
+        ? { location, items: items.map(it => ({ productId: it.product.id, qty: it.qty })) }
+        : { district, items: items.map(it => ({ productId: it.product.id, qty: it.qty })) };
+
       const q = await apiQuoteShipping(payload);
       setShip(q);
     } catch (e) {
@@ -34,6 +65,7 @@ export default function CartPage() {
       setShip(null);
     }
   }
+
 
   async function applyCoupon() {
     setCouponErr('');
@@ -62,65 +94,114 @@ export default function CartPage() {
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Carrito</h2>
 
-      <table style={{ width: '100%', marginTop: 8, borderCollapse: 'collapse' }}>
-        <thead>
-          <tr><th style={{ textAlign: 'left' }}>Producto</th><th>Cantidad</th><th>Precio</th><th></th></tr>
-        </thead>
-        <tbody>
-          {items.map(({ product, qty }) => (
-            <tr key={product.id}>
-              <td>{product.name}</td>
-              <td>
-                <input type="number" min="1" value={qty}
-                  onChange={(e) => setQty(product.id, Number(e.target.value))}
-                  style={{ width: 60 }} />
-              </td>
-              <td>S/ {(product.price * qty).toFixed(2)}</td>
-              <td><button onClick={() => remove(product.id)}>Quitar</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="cart-container">
+      <div style={{ padding: 16 }}>
+        <h2>Carrito</h2>
 
-      <div style={{ marginTop: 12 }}>
-        <b>Subtotal:</b> S/ {subtotal.toFixed(2)}
-      </div>
+        <table style={{ width: '100%', marginTop: 8, borderCollapse: 'collapse' }}>
+          <thead>
+            <tr><th style={{ textAlign: 'left' }}>Producto</th><th>Cantidad</th><th>Precio</th><th></th></tr>
+          </thead>
+          <tbody>
+            {items.map(({ product, qty }) => (
+              <tr key={product.id}>
+                <td>{product.name}</td>
+                <td>
+                  <input type="number" min="1" value={qty}
+                    onChange={(e) => setQty(product.id, Number(e.target.value))}
+                    style={{ width: 60 }} />
+                </td>
+                <td>S/ {(product.price * qty).toFixed(2)}</td>
+                <td><button onClick={() => remove(product.id)}>Quitar</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      <hr style={{ margin: '12px 0' }} />
-
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <label>Distrito:</label>
-        <select value={district} onChange={(e) => setDistrict(e.target.value)}>
-          {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <button onClick={quote}>Cotizar envío</button>
-        {shipErr && <span style={{ color: 'red' }}>{shipErr}</span>}
-      </div>
-      {ship && (
-        <div style={{ marginTop: 8 }}>
-          <b>Envío:</b> S/ {ship.cost.toFixed(2)} (peso total: {ship.totalWeight.toFixed(2)} kg)
+        <div style={{ marginTop: 12 }}>
+          <b>Subtotal:</b> S/ {subtotal.toFixed(2)}
         </div>
-      )}
 
-      <div style={{ marginTop: 12 }}>
-        <input placeholder="Cupón (opcional)" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
-        <button onClick={applyCoupon} style={{ marginLeft: 8 }}>Aplicar</button>
-        {couponErr && <div style={{ color: 'red' }}>{couponErr}</div>}
-        {couponInfo?.valid && <div style={{ color: 'green' }}>Descuento: S/ {couponInfo.discount.toFixed(2)}</div>}
-      </div>
+        <hr style={{ margin: '12px 0' }} />
 
-      <div style={{ marginTop: 12 }}>
-        <b>Total:</b> S/ {total.toFixed(2)}
-      </div>
+        {/* === NUEVA SECCIÓN: cálculo de envío === */}
+        <div style={{ marginTop: 16 }}>
+          <h3>Calcular costo de envío</h3>
 
-      <div style={{ marginTop: 16 }}>
-        <button onClick={() => nav('/checkout', { state: { district, ship, coupon: couponInfo } })}>
-          Continuar al checkout
-        </button>
+          <details open>
+            <summary style={{ cursor: 'pointer', fontWeight: 600, marginBottom: 6 }}>
+              Selecciona tu ubicación en el mapa (o usa el distrito)
+            </summary>
+
+            <MapContainer
+              center={ORIGIN}
+              zoom={12}
+              style={{ height: 320, width: '100%', borderRadius: 8, marginBottom: 8 }}
+            >
+              <TileLayer
+                attribution='&copy; OpenStreetMap contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <LocationPicker onSelect={setLocation} />
+            </MapContainer>
+
+            {location ? (
+              <div style={{ marginBottom: 8 }}>
+                📍 Ubicación seleccionada: <b>{location.latitude.toFixed(4)}</b>,{' '}
+                <b>{location.longitude.toFixed(4)}</b>
+              </div>
+            ) : (
+              <div style={{ marginBottom: 8 }}>
+                O selecciona un distrito manualmente:
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  style={{ marginLeft: 8 }}
+                >
+                  {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+            )}
+
+            <button onClick={quote}>Cotizar envío</button>
+            {shipErr && <span style={{ color: 'red', marginLeft: 8 }}>{shipErr}</span>}
+          </details>
+
+          {ship && (
+            <div style={{ marginTop: 10 }}>
+              {ship.mode === 'distance' && (
+                <div>
+                  <b>Envío:</b> S/ {ship.cost.toFixed(2)} (distancia: {ship.distanceKm.toFixed(2)} km)
+                </div>
+              )}
+              {ship.mode === 'district' && (
+                <div>
+                  <b>Envío:</b> S/ {ship.cost.toFixed(2)} (por distrito: {ship.district})
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+
+        <div style={{ marginTop: 12 }}>
+          <input placeholder="Cupón (opcional)" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
+          <button onClick={applyCoupon} style={{ marginLeft: 8 }}>Aplicar</button>
+          {couponErr && <div style={{ color: 'red' }}>{couponErr}</div>}
+          {couponInfo?.valid && <div style={{ color: 'green' }}>Descuento: S/ {couponInfo.discount.toFixed(2)}</div>}
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <b>Total:</b> S/ {total.toFixed(2)}
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <button onClick={() => nav('/checkout', { state: { district, ship, coupon: couponInfo } })}>
+            Continuar al checkout
+          </button>
+        </div>
       </div>
-    </div>
-  );
+     </div> 
+     );
 }

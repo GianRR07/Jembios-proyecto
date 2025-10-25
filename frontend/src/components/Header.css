@@ -1,0 +1,126 @@
+.header {
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Línea azul superior */
+.header-top {
+  background-color: #003c88;
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 0;
+}
+
+.header-top .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+}
+
+/* Segunda franja */
+.header-main {
+  background-color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+}
+
+.logo img {
+  height: 55px;
+}
+
+.nav {
+  display: flex;
+  gap: 22px;
+}
+
+.nav-link {
+  color: #00214d;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 15px;
+  position: relative;
+}
+
+.nav-link.active {
+  border-bottom: 2px solid #003c88;
+  color: #003c88;
+}
+
+.nav-link:hover {
+  color: #0073e6;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-informes {
+  background-color: #003c88;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-informes:hover {
+  background-color: #0052b5;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;               /* separa INFORMES y Carrito */
+}
+
+.cart-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #003c88;
+  border: 1px solid #d6e2f5;
+  background: #f2f7ff;
+}
+
+.cart-btn:hover {
+  background: #e7f0ff;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #00a651;
+  color: #fff;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.cart-text {
+  font-size: 14px;
+}

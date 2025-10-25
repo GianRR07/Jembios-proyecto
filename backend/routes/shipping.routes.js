@@ -1,16 +1,71 @@
 const { Router } = require('express');
 const db = require('../db/connect');
+const { getDistance } = require('geolib'); // 👈 NUEVO
 const router = Router();
 
 /**
+ * Origen Jembios (aprox. Carabayllo).
+ * Si quieres afinarlo, puedes geocodificar la dirección exacta.
+ */
+const ORIGIN = { latitude: -11.9523, longitude: -77.0394 };
+
+/**
  * POST /api/shipping/quote
- * Body: { district: string, items: [{ productId, qty }] }
- * costo = base_price + (price_per_kg * peso_total)
+ * Body OPCIÓN A (por DISTRICT):
+ *    { district: string, items: [{ productId, qty }] }
+ *    costo = base_price + (price_per_kg * peso_total)
+ *
+ * Body OPCIÓN B (por LOCATION - MAPA):
+ *    { location: { latitude, longitude }, items: [{ productId, qty }] }
+ *    costo = base (S/5) + perKm (S/1.5) * distancia_km
  */
 router.post('/quote', (req, res) => {
-  const { district, items } = req.body || {};
-  if (!district || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ error: 'district e items son requeridos' });
+  const { district, location, items } = req.body || {};
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'items es requerido y no puede estar vacío' });
+  }
+
+  // === MODO B: Por ubicación (mapa) ===
+  if (location && typeof location.latitude === 'number' && typeof location.longitude === 'number') {
+    // Calcula peso total (por si quieres sumar recargo por peso en el futuro)
+    const ids = items.map(it => it.productId);
+    const placeholders = ids.map(() => '?').join(',');
+    db.all(`SELECT id, weight FROM products WHERE id IN (${placeholders})`, ids, (err2, prods) => {
+      if (err2) return res.status(500).json({ error: err2.message });
+
+      const weights = new Map(prods.map(p => [p.id, p.weight]));
+      let totalWeight = 0;
+      for (const it of items) {
+        const w = weights.get(it.productId);
+        if (typeof w !== 'number') {
+          return res.status(400).json({ error: `Producto ${it.productId} no existe` });
+        }
+        totalWeight += w * Number(it.qty || 0);
+      }
+
+      const distMeters = getDistance(ORIGIN, { latitude: location.latitude, longitude: location.longitude });
+      const distKm = distMeters / 1000;
+
+      // Regla simple demo
+      const base = 5;    // S/ 5 base
+      const perKm = 1.5; // S/ 1.5 por km
+      const cost = Number((base + perKm * distKm).toFixed(2));
+
+      return res.json({
+        mode: 'distance',
+        distanceKm: Number(distKm.toFixed(2)),
+        base,
+        perKm,
+        totalWeight: Number(totalWeight.toFixed(2)),
+        cost
+      });
+    });
+    return;
+  }
+
+  // === MODO A: Por distrito (fallback/compat) ===
+  if (!district) {
+    return res.status(400).json({ error: 'district o location son requeridos' });
   }
 
   db.get(
@@ -40,8 +95,9 @@ router.post('/quote', (req, res) => {
 
           const cost = rate.base_price + rate.price_per_kg * totalWeight;
           res.json({
+            mode: 'district',
             district,
-            totalWeight,
+            totalWeight: Number(totalWeight.toFixed(2)),
             base: rate.base_price,
             perKg: rate.price_per_kg,
             cost: Number(cost.toFixed(2))
