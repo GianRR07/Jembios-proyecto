@@ -88,7 +88,7 @@ export default function CartPage() {
     return (
       <div style={{ padding: 16 }}>
         <div>Tu carrito está vacío.</div>
-        <Link to="/">Volver al catálogo</Link>
+        <Link to="/productos">Volver al catálogo</Link>
       </div>
     );
   }

@@ -27,17 +27,17 @@ export default function OrderPage() {
   useEffect(() => { load(); }, [id]);
 
   async function pay(result = 'success') {
-  try {
-    await apiPayOrder(id, { method: 'mock', result });
-    await load();
+    try {
+      await apiPayOrder(id, { method: 'mock', result });
+      await load();
 
-    if (result === 'success') {
-      localStorage.setItem('trackOrderId', String(id));
+      if (result === 'success') {
+        localStorage.setItem('trackOrderId', String(id));
+      }
+    } catch (e) {
+      alert(String(e.message || e));
     }
-  } catch (e) {
-    alert(String(e.message || e));
   }
-}
 
 
   if (loading) return <div style={{ padding: 16 }}>Cargando orden...</div>;
@@ -86,7 +86,7 @@ export default function OrderPage() {
             <button className="btn-secondary" onClick={() => pay('failed')}>Fallar pago</button>
           </>
         )}
-        <Link to="/" className="btn-secondary">Volver al inicio</Link>
+        <Link to="/productos" className="btn-secondary">Volver a productos</Link>
       </div>
     </div>
   );

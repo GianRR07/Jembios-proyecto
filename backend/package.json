@@ -11,17 +11,20 @@
     "migrate:tasks": "node db/migrate-run-3.js",
     "migrate:deliveries": "node db/migrate-run-4.js",
     "migrate:complaints": "node db/migrate-run-5.js",
-    "migrate:orders:location": "node db/migrate-run-6.js"
-
+    "migrate:orders:location": "node db/migrate-run-6.js",
+    "migrate:authmkt": "node db/migrate-auth-marketing.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "geolib": "^3.3.4",
+    "multer": "^2.0.2",
+    "serve-index": "^1.9.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
