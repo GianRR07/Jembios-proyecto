@@ -4,7 +4,16 @@
   "main": "index.js",
   "scripts": {
     "start": "node servidor.js",
-    "dev": "nodemon servidor.js"
+    "dev": "nodemon servidor.js",
+    "init:db": "node db/init-db.js",
+    "migrate:orders": "node db/migrate-run.js",
+    "migrate:payments": "node db/migrate-run-2.js",
+    "migrate:tasks": "node db/migrate-run-3.js",
+    "migrate:deliveries": "node db/migrate-run-4.js",
+    "migrate:complaints": "node db/migrate-run-5.js"
+
+
+
   },
   "keywords": [],
   "author": "",
