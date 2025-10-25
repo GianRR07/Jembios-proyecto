@@ -12,6 +12,9 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
+// === SERVIR CARPETA UPLOADS DE FORMA PÚBLICA ===
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // === CONEXIÓN A LA BASE DE DATOS ===
 const dbPath = path.join(__dirname, 'db', 'database.db');
 const db = new sqlite3.Database(dbPath, (err) => {
@@ -62,7 +65,7 @@ authRouter.post('/register', (req, res) => {
   });
 });
 
-// 👉 LOGIN DE USUARIO (sin validación segura)
+// 👉 LOGIN DE USUARIO 
 authRouter.post('/login', (req, res) => {
   const { correo, password } = req.body;
 
@@ -96,6 +99,14 @@ authRouter.get('/usuarios', (req, res) => {
     res.json(rows);
   });
 });
+// marketing.routes.js
+router.get('/productos/aprobados', (req, res) => {
+  db.all('SELECT * FROM productos', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
 
 // === MONTAR RUTAS ===
 app.use('/api/auth', authRouter);

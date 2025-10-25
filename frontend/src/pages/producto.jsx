@@ -54,6 +54,7 @@ export default function Producto() {
     },
   ]);
 
+  const [productosAprobados, setProductosAprobados] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [categorias, setCategorias] = useState({
     "Instrumento Medico": true,
@@ -73,6 +74,14 @@ export default function Producto() {
       categorias[p.categoria] &&
       p.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
+
+  // Traer productos aprobados del backend
+  useEffect(() => {
+    fetch("http://localhost:5000/api/marketing/productos/aprobados")
+      .then((res) => res.json())
+      .then((data) => setProductosAprobados(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   // TOAST AUTO-CIERRE
   useEffect(() => {
@@ -101,36 +110,29 @@ export default function Producto() {
   };
 
   const comprar = () => {
-  if (carrito.length === 0) {
-    alert("Tu carrito está vacío.");
-    return;
-  }
-  if (!direccion) {
-    alert("Por favor, selecciona o escribe tu dirección antes de comprar.");
-    return;
-  }
+    if (carrito.length === 0) {
+      alert("Tu carrito está vacío.");
+      return;
+    }
+    if (!direccion) {
+      alert("Por favor, selecciona o escribe tu dirección antes de comprar.");
+      return;
+    }
 
-  const resumen = carrito
-    .map((p) => `• ${p.nombre} - S/ ${p.precio.toFixed(2)}`)
-    .join("\n");
+    const resumen = carrito
+      .map((p) => `• ${p.nombre} - S/ ${p.precio.toFixed(2)}`)
+      .join("\n");
 
-  const mensaje = `Pedido desde Jembios 🏥\n\n${resumen}\n\nTotal: S/ ${total.toFixed(
-    2
-  )}\nDirección: ${direccion}`;
+    const mensaje = `Pedido desde Jembios 🏥\n\n${resumen}\n\nTotal: S/ ${total.toFixed(
+      2
+    )}\nDirección: ${direccion}`;
 
-  // Guardamos la dirección para el seguimiento
-  sessionStorage.setItem("direccionPedido", direccion);
+    sessionStorage.setItem("direccionPedido", direccion);
+    setCarrito([]);
+    setMostrarCarrito(false);
+    window.location.href = "/seguimiento";
+  };
 
-  // Limpieza del carrito
-  setCarrito([]);
-  setMostrarCarrito(false);
-
-  // Redirigir a seguimiento
-  window.location.href = "/seguimiento";
-};
-
-
-  // CLICK EN MAPA: obtiene dirección real (calle)
   function MapClickHandler() {
     useMapEvents({
       click(e) {
@@ -243,6 +245,45 @@ export default function Producto() {
             </div>
           ))}
         </section>
+      </div>
+
+      {/* NUEVA SECCIÓN: PRODUCTOS APROBADOS */}
+      <div className="max-w-7xl mx-auto mt-12 px-4">
+        <h2 className="text-2xl font-bold text-blue-700 mb-6">Productos Aprobados</h2>
+        <div className="space-y-6">
+          {productosAprobados.map((prod) => (
+            <div key={prod.id_pendiente} className="bg-white p-4 rounded-xl shadow-md flex space-x-4 max-w-4xl border border-blue-200">
+              <div className="flex-shrink-0">
+                <img
+                  src={`http://localhost:5000/uploads/${prod.imagen_url}`}
+                  alt={prod.nombre}
+                  className="w-48 h-48 object-cover rounded"
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-blue-700">{prod.nombre}</h3>
+                <p className="text-gray-600">{prod.principio_activo}</p>
+                <p className="text-gray-800 mt-2">{prod.descripcion}</p>
+                <p className="text-gray-700 mt-2">SKU: {prod.sku}</p>
+                <p className="text-gray-700 mt-1">Precio: S/ {prod.precio}</p>
+                <p className="text-gray-700 mt-1">Categoría: {prod.categoria}</p>
+                {prod.certificado_url && (
+                  <a
+                    href={`http://localhost:5000/uploads/${prod.certificado_url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 bg-gray-100 px-3 py-1 rounded hover:bg-gray-200"
+                  >
+                    Ver certificado
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+          {productosAprobados.length === 0 && (
+            <p className="text-gray-600">No hay productos aprobados aún</p>
+          )}
+        </div>
       </div>
 
       {/* MODAL PRODUCTO */}

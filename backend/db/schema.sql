@@ -20,14 +20,33 @@ CREATE TABLE IF NOT EXISTS usuarios (
     FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
 );
 
--- TABLA DE PRODUCTOS
+-- TABLA DE PRODUCTOS ACTIVOS
 CREATE TABLE IF NOT EXISTS productos (
     id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre TEXT NOT NULL,
+    principio_activo TEXT,
     descripcion TEXT,
+    sku TEXT UNIQUE,
     precio REAL NOT NULL,
-    stock INTEGER NOT NULL DEFAULT 0,
-    imagen_url TEXT
+    categoria TEXT,
+    imagen_url TEXT,
+    certificado_url TEXT,
+    aprobado INTEGER DEFAULT 1
+);
+
+-- TABLA DE PRODUCTOS PENDIENTES
+CREATE TABLE IF NOT EXISTS productos_pendientes (
+    id_pendiente INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    principio_activo TEXT,
+    descripcion TEXT,
+    sku TEXT,
+    precio REAL NOT NULL,
+    categoria TEXT,
+    imagen_url TEXT,
+    certificado_url TEXT,
+    estado TEXT DEFAULT 'pendiente', -- pendiente / aprobado / rechazado
+    fecha_creacion TEXT DEFAULT (datetime('now'))
 );
 
 -- TABLA DE VENTAS
@@ -60,7 +79,7 @@ CREATE TABLE IF NOT EXISTS facturas (
     FOREIGN KEY (id_venta) REFERENCES ventas(id_venta)
 );
 
--- TABLA DE MARKETING (ejemplo)
+-- TABLA DE MARKETING
 CREATE TABLE IF NOT EXISTS marketing (
     id_marketing INTEGER PRIMARY KEY AUTOINCREMENT,
     titulo TEXT NOT NULL,
@@ -69,12 +88,28 @@ CREATE TABLE IF NOT EXISTS marketing (
     fecha_fin TEXT
 );
 
+-- TABLA DE PRODUCTOS PENDIENTES PARA APROBACION
+CREATE TABLE IF NOT EXISTS productos_pendientes (
+    id_pendiente INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    principio_activo TEXT,
+    descripcion TEXT,
+    sku TEXT,
+    precio REAL NOT NULL,
+    categoria TEXT,
+    imagen_url TEXT,
+    certificado_url TEXT,
+    estado TEXT DEFAULT 'pendiente'
+);
+
+
+
 -- Insertar roles iniciales si no existen
 INSERT INTO roles (nombre_rol)
 SELECT 'Administrador' WHERE NOT EXISTS (SELECT 1 FROM roles WHERE nombre_rol = 'Administrador');
 
 INSERT INTO roles (nombre_rol)
-SELECT 'Empleado' WHERE NOT EXISTS (SELECT 1 FROM roles WHERE nombre_rol = 'Empleado');
+SELECT 'Marketing' WHERE NOT EXISTS (SELECT 1 FROM roles WHERE nombre_rol = 'Marketing');
 
 INSERT INTO roles (nombre_rol)
 SELECT 'Cliente' WHERE NOT EXISTS (SELECT 1 FROM roles WHERE nombre_rol = 'Cliente');
